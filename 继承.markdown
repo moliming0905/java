@@ -1,0 +1,68 @@
+##继承
+<pre>
+package 静态函数;
+
+/*目前存在的问题：
+ * 	1.无法描述清楚这两个类之间的继承关系
+ *  2.存在着重复代码。
+ * 
+ * 面向对象的三大特征：
+ * 	1.封装
+ *  2.继承
+ *  3.多态
+ *  
+ *  继承：继承是通过关键字extends体现的。
+ *  
+ *  继承的格式：
+ *  	class 类名1 extends 类名2{
+ *  
+ *  	}
+ * <font color="blue">	继承要注意的事项：
+ * 		1.千万不要为了减少重复代码而去继承，只有真正存在着继承关系的时候才去继承。
+ * 		2.父类私有的成员不能被继承。
+ * 		3.父类的构造函数不能被继承。
+ * 		4.创建子类对象时默认会先调用父类无参的构造函数。
+ * </font>	<font color="red">疑问：为什么要调用父类的构造方法啊？这样子做的意义在哪里？</font>
+ * */
+
+//人类
+class Person{
+	String name;
+	private int age;
+	public Person(String name){
+		this.name = name;
+		System.out.println("Person类的带参构造方法被调用");
+	}
+	public Person(){
+		System.out.println("Person类的无参构造方法被调用");
+	}
+	public void eat(){
+		System.out.println(this.name+"在吃饭");
+	}
+}
+/*Student称作Person类的子类，Person类就称作为Student的父类(基类、超类)*/
+class Student1 extends Person{
+	int num;	//学号
+	//String name; //名字
+	public Student1(int num){
+		this.num = num;
+		System.out.println("Student类的带参构造方法被调用");
+	}
+	public Student1(){
+		System.out.println("Student类的无参构造方法被调用");
+	}
+	public void study(){
+		System.out.println(this.name+" good good study, day day up");
+	}
+}
+public class Demo7 {
+	public static void main(String[] args){
+		Student1 s = new Student1();
+		//s.name = "狗娃";
+		//s.study();
+		//s.eat();
+		//s.age = 20;
+	}
+}
+
+</pre>

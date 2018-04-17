@@ -1,0 +1,152 @@
+<h1>静态方法和变量</h1>
+<pre>
+package 静态函数;
+<font color="blue">
+/*		static修饰方法(静态的成员方法):
+ * 		访问方式：
+ * 			方式一：可以使用对象进行访问。
+ * 					对象.静态的函数名();
+ * 			方式二：可以直接使用类名进行访问
+ * 					类名.静态的函数名();
+ * 		推荐使用类名直接访问静态的成员函数的优点：
+ * 			1.节省内存
+ * 			2.书写更加简便		
+<font color="red">
+ * 静态函数要注意的事项：
+ * 	    1.静态函数是可以调用类名或者对象进行调用的，而非静态函数只能使用对象进行调用
+ * 		2.静态的函数可以直接访问静态的成员，但是不能直接访问非静态的成员。
+ * 			原因：静态函数是可以使用类名直接调用的，这时候有可能还没有存在对象，而非静态的成员数据是随着对象的存在而存在的 。
+ * 		3.非静态的函数是可以直接访问静态与非静态的成员
+ * 			原因：非静态函数只能由对象调用，当对象存在的时候，静态数据老早就已经存在了，而非静态数据也随着对象的创建而存在了。
+ * 		4.静态函数不能出现this或者super关键字
+ * 			原因：因为静态的函数是可以使用类名调用的，一旦使用类名调用这时候不存在对象，而this关键字是代表了一个函数的调用者对象，这时候产生了冲突。
+ * 
+</font>
+ * 静态的数据的生命周期： 静态的成员变量是优先于非静态的成员变量的。
+ * 
+ * static 什么时候修饰一个函数
+ * 	如果一个函数没有直接访问到非静态成员时， 那么就可以使用static修饰了。一般用于工具类型的方法
+ * 
+ * 静态函数不能访问非静态的成员？
+ * 		静态函数只要存在有对象，那么也可以访问非静态的数据。只是不能直接访问而已。
+ * 
+<font color="green">
+ * 静态的成员变量与非静态的成员变量的区别：
+ * 		1.作用上的 区别
+ * 			a.静态的成员变量的作用是共享一个数据给所有对象使用
+ * 			b.非静态的成员变量的作用是描述一类事物的公共属性。
+ * 		2.数量与存储位置上的区别：
+ * 			a.静态成员变量是存储在方法区内存中，而且只会存在一份数据
+ * 			b.非静态的成员变量是存储在堆内存中，有那个n个对象就有n份数据
+ * 		3.生命周期的区别：
+ * 			a.静态的成员变量数据是随着类的加载而存在，随着类文件的消失而消失。
+ * 			b.非静态的成员数据是随着对象的创建而存在，随着对象被垃圾回收器回收而消失。
+ * */
+</font>
+</font>
+class Student{
+	String name; //名字
+	static String country = "中国";//国籍
+	
+	//静态代码块：静态代码块是在Student.class文件加载到内存的时候就马上执行的。
+	//并且只是一次
+	static{
+		System.out.println("静态代码块执行了");
+		
+	}
+	
+	//构造函数
+	public Student(String name){
+		this.name = name;
+	}
+	//非静态的成员函数
+	public void study(){
+		//非静态的方法访问非静态数据
+		System.out.println(this.name+" 好好学习");
+		//非静态的方法访问静态数据
+		System.out.println(country+" 好好学习");
+	}
+	//静态方法
+	//静态方法与非静态方法的字节码文件是同时存在内存中的。只是静态的成员变量数据是优先于对象存在的而已
+	public static void sleep(){
+		//静态方法访问静态的数据
+		System.out.println(" 呼呼大睡  "+country);
+		//静态方法访问非静态的数据
+		//System.out.println(" 静态方法访问非静态的数据 "+name);
+		//静态方法访问非静态函数
+		//study();
+		//静态方法使用this关键字
+		//System.out.println("静态方法访问this"+this.country);
+		Student s = new Student("铁蛋");
+		System.out.println(s.name+"睡觉中。。。");
+	}
+}
+
+public class Demo2 {
+	public static void main(String[] args){
+		//Student s = new Student("狗娃");
+		//用对象的方式访问
+		//s.sleep();
+		//s.study();
+		//用类名直接访问
+		Student.sleep();
+		//Student.study();
+		
+	}
+}
+</pre>
+<hr/>
+<h3>编写一个简易静态数组工具类</h3>
+<pre>
+package 静态函数;
+
+/*
+ * 需求：编写一个数组工具类
+ * Arrays.toString()
+ * sort()
+ * 
+ * */
+/*数组工具类*/
+class ArrayTool{
+	public static String toString(int[] arr){
+		String result = "";
+		for(int i = 0; i < arr.length; i++){
+			if(i==0){
+				result+="["+arr[i]+",";
+			}else if(i==(arr.length-1)){
+				result+=+arr[i]+"]";
+			}else{
+				result+=arr[i]+",";
+			}
+		}
+		return result;
+	}
+	public static void sort(int[] arr){
+		for(int i = 0; i < arr.length-1; i++){
+			for(int j = i+1; j < arr.length; j++){
+				if(arr[i] > arr[j]){
+					int temp = arr[i];
+					arr[i] = arr[j];
+					arr[j] = temp;
+				}
+			}
+		}
+	}
+}
+
+
+public class Demo3 {
+
+	public static void main(String[] args) {
+		int[] arr = {12,1,456,165};
+		//ArrayTool tool = new ArrayTool();
+		//tool.sort(arr);
+		//String info = tool.toString(arr);
+		//方法直接声明成static类型,可以直接通过类名访问。方便，不用创建对象。
+		ArrayTool.sort(arr);
+		String info = ArrayTool.toString(arr);
+		System.out.println("数组元素是："+info);
+	}
+
+}
+</pre>
