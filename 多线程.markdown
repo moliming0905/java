@@ -1,0 +1,349 @@
+#多线程设计以及线程安全问题
+###线程初体验
+<pre>
+package fun.wangli.Thread;
+/*	*
+ * 进程：正在执行的程序称作为一个进程。进程负责了内存空间的 划分。
+ * 
+ * 问题： Windows号称是多任务的操作系统，那么Windows是同时运行多个应用程序吗？
+ * 		从宏观的角度： Windows确实是在同时运行多个应用程序。
+ * 		
+ * 		从微观的角度： cpu是做了一个快速的切换执行的动作。由于速度太快，感觉不到进行切换，所以感觉是在同时执行。
+ * 		
+ * 	线程： 线程在一个进程中负责了代码的执行，就是进程中一个执行路径		
+ * 
+ * 	多线程：在一个进程中有多个线程同时在执行不同 的任务。
+ * 
+ * 	疑问： 我们线程负责了代码的执行，我们之前没有学过线程，为什么代码可以执行？
+ * 		任何一个java程序，jvm在运行的时候都会创建一个main线程执行main方法中的所有代码。
+ * 
+ * 	一个java应用程序至少有几个线程？
+ * 		至少有两个线程，一个是主线程负责main方法代码的执行，一个是垃圾回收器线程，负责了垃圾回收。
+ * 
+ * 多线程的好处：
+ * 	1.解决了一个进程能同时执行多个任务的问题
+ * 	2.提高了资源的 利用率。
+ * 
+ * 多线程的弊端：
+ * 	1.增加cpu的负担
+ * 	2.降低了一个进程中线程的执行概率。
+ * 	3.引发了线程安全问题
+ *  4.出现了死锁现象。
+ *  
+ *  如何创建多线程：
+ *  	创建线程的方式有两种：
+ *  		方式一：
+ *  			1.自定义一个类继承Thread类
+ *  			2.重写Thread的run方法
+ *  				疑问：为什么要重写run方法，重写run方法的目的是什么？
+ *  					每个线程都有自己的任务代码。jvm创建的主线程任务代码就是main方法的所有代码。
+ *  				自定义线程的任务代码就写run方法中。自定义线程负责了run方法中代码的执行。
+ * 				3.创建Thread的子类对象，并且调用start方法开启线程。
+ * 					一个线程一旦开启，那么线程就会执行run方法中的代码，run方法千万不能直接调用，
+ * 				直接调用run方法就相当调用了一个普通的方法而已，并没有开启新的线程。
+ * 
+ * */
+public class Demo1 extends Thread{
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		
+		//创建了自定义的线程对象。
+		Demo1 d = new Demo1();
+		//d.run();
+		//调用start方法启动线程。
+		d.start();
+		for(int i = 0; i < 100; i++){
+			System.out.println("main线程： "+i);
+		}
+		
+	}
+	
+	//把自定义线程的任务代码写在run方法中。
+	@Override
+	public void run(){
+		for(int i = 0; i < 100; i++){
+			System.out.println("自定义线程: "+i);
+		}
+	}
+}
+
+</pre>
+###简单模拟
+<pre>
+package fun.wangli.Thread;
+
+/**
+ * 需求： 模拟QQ视频与聊天同时在执行。
+ * */
+
+class TalkThread extends Thread{
+	@Override
+	public void run(){
+		while(true){
+			System.out.println("hi,你好！,开个视频呗？");
+		}
+	}
+}
+class VideoThread extends Thread{
+	@Override
+	public void run(){
+		while(true){
+			System.out.println("视频通信中...");
+		}
+	}
+}
+
+public class Demo2 {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		TalkThread tt =new TalkThread();
+		tt.start();
+		VideoThread vt = new VideoThread();
+		vt.start();
+		
+	}
+
+}
+
+</pre>
+###线程的构造
+<pre>
+package fun.wangli.Thread;
+/*
+ * 线程常用的方法：	
+ * 	Thread(String name)		初始化线程的名字
+ * 		getName()			返回线程的名字
+ * 		setName(String name)		设置线程对象名
+ * 		sleep()				线程睡眠指定的毫秒数。静态的方法，那个线程执行了sleep方法那么就是那个线程睡眠。
+ * 		getPriority()		返回当前线程对象的优先级，默认线程的优先级是5
+ * 		setPriority(int newPriority)	设置线程的优先级，虽然设置了线程的优先级，但是具体的实现取决于底层的
+ * 				操作系统的实现(最大的优先级是10，最小的是1，默认的 是5)
+ * 		currentThread()		返回CPU正在执行的线程对象，该方法是一个静态方法，注意那个线程执行了currentThread()代码，就返回线程对象。
+ * 
+ * */
+public class Demo3 extends Thread{
+	public Demo3(String threadname){
+		super(threadname);//调用Thread类的一个参数的构造方法。
+	}
+	
+	@Override
+	public void run(){
+		System.out.println("this:"+this);
+		/*for(int i = 0; i < 100; i++){
+			System.out.println(this.getName()+":"+i);
+			try {
+				Thread.sleep(10);
+				//为什么在这里不能抛出异常类型?只能捕获？？
+				//Thread类的run方法没有抛出异常类型，所以子类不能抛出异常类型。
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}*/
+	}
+	public static void main(String[] args) throws InterruptedException{
+		Demo3 d = new Demo3("王之线程");
+		d.start();
+	/*	for(int i = 0; i < 100; i++){
+			System.out.println("主线程执行中："+i);
+		}
+		*/
+		Demo3 d2 = new Demo3("中国");
+		d2.start();
+		
+		Thread mainThread = Thread.currentThread();
+		System.out.println("主线程的名字："+mainThread.getName());
+		System.out.println("自定义线程的优先级："+d.getPriority());
+		System.out.println("主线程优先级： "+Thread.currentThread().getPriority());
+	}
+}
+
+</pre>
+###线程同步
+<pre>
+package fun.wangli.Thread;
+/**
+ * 需求： 模拟三个窗口同时在卖50张票
+ * 
+ * 问题1： 为什么50张票被卖出了150次？
+ * 		出现的原因： 因为ticketNum是非静态的，非静态的成员变量数据是在每个对象中都会维护一份数据的，三个线程对象就会有三份。
+ * 
+ * 解决方案： 把ticketNum票数共享出来给三个线程对象使用。使用static修饰。
+ * 
+ * 问题2： 出现了线程安全问题。
+ * 	线程安全问题的解决方案:sun提供了线程同步机制让我们解决这类问题的。
+ * 		
+ * 		java线程同步机制的方式：
+ * 			方式一： 同步代码块
+ * 				同步代码块的格式：
+ * 					synchronized(锁对象){
+ * 						需要被同步的代码。。。
+ * 					}
+ * 				同步代码块要注意事项：
+ * 					1.任意的一个对象都可以作为锁对象。
+ * 					2.在同步代码块中调用了sleep方法并不是释放锁对象的。
+ * 					3.只要真正存在线程安全问题的时候才使用同步代码块，否则会降低效率的。
+ * 					4.多线程操作的锁对象必须是唯一共享的。否则无效。
+ * 
+ * 需求：一个银行账户有5000块，两夫妻一个拿着存折，一个拿着卡，开始取钱比赛，每次只能取1000块，要求不能出现线程安全问题。
+ * 
+ * 
+ * 			方式二：同步函数	
+ * 
+ * 
+ * 	
+ * 在什么情况下才可能出现线程安全问题？
+ * 		1.存在两个或者两个以上的线程对象，而且线程之间共享着一个资源。
+ * 		2.有多个语句操作了共享资源。
+ * 
+ * */
+class SaleTicket extends Thread{
+	//int ticketNum = 50;	//票数，非静态成员变量数据是在每一个对象中都会维护一份数据的。
+	//int state = 1;
+	static int ticketNum = 50;//让线程对象共享这一个成员变量。
+	static Object o = new Object();//锁对象，共享，唯一。
+	
+	public SaleTicket(String name){
+		super(name);
+	}
+	
+	@Override
+	public void run(){
+		while(true){
+			//同步代码块
+			synchronized(o){
+				if(ticketNum > 0){
+					System.out.println(Thread.currentThread().getName()+"售出了第 "+ticketNum+" 号票");
+					ticketNum = ticketNum -1;
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}else{
+					System.out.println("卖完了");
+					break;
+				}
+			}
+		}
+	}
+}
+
+
+public class Demo4 {
+	public static void main(String[] args){
+		//创建三个线程对象，模拟是三个窗口
+		SaleTicket s1 = new SaleTicket("窗口1");
+		SaleTicket s2 = new SaleTicket("窗口2");
+		SaleTicket s3 = new SaleTicket("窗口3");
+		
+		//开启线程买票
+		s1.start();
+		s2.start();
+		s3.start();
+	}
+}
+
+</pre>
+
+###实践练习
+<pre>
+package fun.wangli.Thread;
+/*
+ * 需求：一个银行账户有5000块，两夫妻一个拿着存折，一个拿着卡，开始取钱比赛，每次只能取1000块，要求不能出现线程安全问题。
+ * */
+//创建多线程对象
+class CoupleFetchMoney extends Thread{
+	public static int balance = 5000;//定义账户余额，夫妻共享一个账户
+	public static Object o = new Object();	//定义共享锁对象，用来同步代码块
+	
+	public CoupleFetchMoney(String name){
+		//调用Thread的一个参数的构造方法。
+		super(name);
+	}
+	
+	@Override
+	public void run(){
+		while(true){
+			
+			synchronized(o){
+				//余额不为0，才可以继续取钱
+				if(balance>0){
+					System.out.println(Thread.currentThread().getName()+"取走了1000块钱");
+					balance = balance - 1000;
+				}else{
+					System.out.println("余额不足");
+					break;
+				}
+			}
+		
+			//这里的“同步锁”在字符串常量池中，所以是静态的，三个对象共享的。
+			/*synchronized("同步锁"){
+				//余额不为0，才可以继续取钱
+				if(balance>0){
+					System.out.println(Thread.currentThread().getName()+"取走了1000块钱");
+					balance = balance - 1000;
+				}else{
+					System.out.println("余额不足");
+					break;
+				}
+			}
+			*/
+			/*
+			//这样做是没法实现同步的 
+			synchronized(new String("锁测试")){
+				//余额不为0，才可以继续取钱
+				if(balance>0){
+					System.out.println(Thread.currentThread().getName()+"取走了1000块钱");
+					balance = balance - 1000;
+				}else{
+					System.out.println("余额不足");
+					break;
+				}
+			}
+			*/
+			
+		}
+		
+	}
+}
+
+public class Demo5 {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		//创建线程对象
+		CoupleFetchMoney cfm1 = new CoupleFetchMoney("志明");
+		CoupleFetchMoney cfm2 = new CoupleFetchMoney("春娇");
+		//启动线程对象
+		cfm1.start();
+		cfm2.start();
+		
+	}
+
+}
+
+</pre>
+##总结
+<pre>
+	线程同步锁，需要使用线程对象都能访问并且共享的唯一一个对象才可以。
+	因此可以在自定义线程类中加上
+	public static Object o = new Object();
+
+	synchronized(o){
+		需要同步的代码块。
+	}	
+	或者直接
+	synchronized("同步锁"){
+		需要同步的代码块
+	}
+	这里的"同步锁"可以替换成任意的字符串对象。因为字符串对象是保存在字符串常量池中的。
+
+	synchronized(new String("同步锁")){
+		需要同步的代码块
+	}
+	这样做是不可以的。
+</pre>

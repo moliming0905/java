@@ -1,0 +1,32 @@
+##权限修饰符
+<pre>
+/**
+ * 权限修饰符：权限修饰符就是控制被修饰的成员的范围可见性。
+ * 	
+ * 
+ * 			public(公共的)		protected(受保护的)	default(缺省的)	private(私有的)
+ * 
+ * 同一个类		true				true		true			true
+ * 		
+ * 同一个包		true				true		true			false
+ *
+ * 子父类			true				true		false			false		
+ * 		
+ * 不同包			true				false		false			false
+ * 
+ * 
+ * 注意：在不同包下面只有public 与 protected可以访问，而且protected必须是在继承关系下才能够访问。
+ * */
+package bb;
+import aa.Demo7;
+public class Demo8 extends Demo7{
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		Demo8 d8 = new Demo8();
+		System.out.println("i = "+d8.i);
+	}
+
+}
+
+</pre>
